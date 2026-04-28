@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EQD2 Calculator from Physical Dose</title>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #d1d5db;
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --danger: #b91c1c;
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --warning-bg: #fff7ed;
+      --warning-border: #fed7aa;
+      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .page {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+
+    header {
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.9fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 820px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 1.25rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #fff;
+      color: var(--text);
+    }
+
+    input:focus, select:focus {
+      outline: 3px solid rgba(37, 99, 235, 0.18);
+      border-color: var(--primary);
+    }
+
+    .hint {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      font-size: 0.98rem;
+      font-weight: 700;
+    }
+
+    .primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .secondary {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+
+    .secondary:hover {
+      background: #d1d5db;
+    }
+
+    .result-box {
+      border: 1px solid var(--success-border);
+      background: var(--success-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .result-row:last-child {
+      border-bottom: 0;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .result-value {
+      text-align: right;
+      font-weight: 800;
+      font-size: 1.08rem;
+    }
+
+    .message {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      font-weight: 700;
+    }
+
+    .message.error {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: var(--danger);
+    }
+
+    .formula {
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.95rem;
+      color: #111827;
+    }
+
+    .warning {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      color: #7c2d12;
+      border-radius: 12px;
+      padding: 13px 14px;
+      font-size: 0.92rem;
+      margin-top: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      padding: 8px 6px;
+    }
+
+    th {
+      color: var(--muted);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>EQD2 Calculator from Physical Dose</h1>
+      <p class="subtitle">Quick physical dose → BED and EQD2 calculator using the linear-quadratic model.</p>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Inputs</h2>
+
+        <div id="message" class="message"></div>
+
+        <div class="field">
+          <label for="totalDose">Total physical dose (Gy)</label>
+          <input id="totalDose" type="number" step="0.01" min="0" value="60" />
+          <span class="hint">Total prescribed or delivered physical dose.</span>
+        </div>
+
+        <div class="field">
+          <label for="fractions">Number of fractions</label>
+          <input id="fractions" type="number" step="1" min="1" value="30" />
+          <span class="hint">Must be a positive whole number.</span>
+        </div>
+
+        <div class="field">
+          <label for="alphaBeta">α/β ratio (Gy)</label>
+          <input id="alphaBeta" type="number" step="0.01" min="0.01" value="10" />
+          <span class="hint">Common examples: tumor 10 Gy, late-responding tissue 3 Gy.</span>
+        </div>
+
+        <div class="field">
+          <label for="rounding">Decimal places</label>
+          <select id="rounding">
+            <option value="1">1 decimal</option>
+            <option value="2" selected>2 decimals</option>
+            <option value="3">3 decimals</option>
+          </select>
+        </div>
+
+        <div class="button-row">
+          <button class="primary" type="button" onclick="calculateEqd2()">Calculate</button>
+          <button class="secondary" type="button" onclick="resetForm()">Reset</button>
+          <button class="secondary" type="button" onclick="copyResults()">Copy results</button>
+        </div>
+
+        <div class="warning">
+          For educational and calculation support only. Verify all clinical calculations independently before patient care use.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Results</h2>
+
+        <div class="result-box">
+          <div class="result-row">
+            <span class="result-label">Dose per fraction</span>
+            <span id="dosePerFraction" class="result-value">2.00 Gy/fx</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">BED</span>
+            <span id="bed" class="result-value">72.00 Gy</span>
+          </div>
+          <div class="result-row">
+            <span class="result-label">EQD2</span>
+            <span id="eqd2" class="result-value">60.00 Gy</span>
+          </div>
+        </div>
+
+        <p class="small" id="copyStatus"></p>
+
+        <h2>Formula</h2>
+        <div class="formula">
+d = D / n<br />
+BED = D × (1 + d / α/β)<br />
+EQD2 = BED / (1 + 2 / α/β)<br /><br />
+Equivalent:<br />
+EQD2 = D × (d + α/β) / (2 + α/β)
+        </div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 18px;">
+      <h2>Reference examples</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Total dose</th>
+            <th>Fractions</th>
+            <th>Dose/fx</th>
+            <th>α/β</th>
+            <th>BED</th>
+            <th>EQD2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>60 Gy</td>
+            <td>30</td>
+            <td>2.00 Gy</td>
+            <td>10 Gy</td>
+            <td>72.00 Gy</td>
+            <td>60.00 Gy</td>
+          </tr>
+          <tr>
+            <td>30 Gy</td>
+            <td>5</td>
+            <td>6.00 Gy</td>
+            <td>10 Gy</td>
+            <td>48.00 Gy</td>
+            <td>40.00 Gy</td>
+          </tr>
+          <tr>
+            <td>20 Gy</td>
+            <td>5</td>
+            <td>4.00 Gy</td>
+            <td>3 Gy</td>
+            <td>46.67 Gy</td>
+            <td>28.00 Gy</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      EQD2 Calculator from Physical Dose — single-file HTML app for local use or GitHub Pages.
+    </footer>
+  </main>
+
+  <script>
+    function getNumber(id) {
+      return Number(document.getElementById(id).value);
+    }
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function showError(text) {
+      const message = document.getElementById('message');
+      message.textContent = text;
+      message.className = 'message error';
+    }
+
+    function clearError() {
+      const message = document.getElementById('message');
+      message.textContent = '';
+      message.className = 'message';
+    }
+
+    function format(value, decimals) {
+      return Number(value).toFixed(decimals);
+    }
+
+    function calculateEqd2() {
+      clearError();
+      setText('copyStatus', '');
+
+      const totalDose = getNumber('totalDose');
+      const fractions = getNumber('fractions');
+      const alphaBeta = getNumber('alphaBeta');
+      const decimals = Number(document.getElementById('rounding').value);
+
+      if (!Number.isFinite(totalDose) || totalDose <= 0) {
+        showError('Please enter a total physical dose greater than 0 Gy.');
+        return;
+      }
+
+      if (!Number.isFinite(fractions) || fractions <= 0 || !Number.isInteger(fractions)) {
+        showError('Please enter a positive whole number of fractions.');
+        return;
+      }
+
+      if (!Number.isFinite(alphaBeta) || alphaBeta <= 0) {
+        showError('Please enter an α/β ratio greater than 0 Gy.');
+        return;
+      }
+
+      const dosePerFraction = totalDose / fractions;
+      const bed = totalDose * (1 + dosePerFraction / alphaBeta);
+      const eqd2 = bed / (1 + 2 / alphaBeta);
+
+      setText('dosePerFraction', `${format(dosePerFraction, decimals)} Gy/fx`);
+      setText('bed', `${format(bed, decimals)} Gy`);
+      setText('eqd2', `${format(eqd2, decimals)} Gy`);
+    }
+
+    function resetForm() {
+      document.getElementById('totalDose').value = 60;
+      document.getElementById('fractions').value = 30;
+      document.getElementById('alphaBeta').value = 10;
+      document.getElementById('rounding').value = 2;
+      clearError();
+      setText('copyStatus', '');
+      calculateEqd2();
+    }
+
+    async function copyResults() {
+      const text = [
+        'EQD2 Calculator from Physical Dose',
+        `Total physical dose: ${document.getElementById('totalDose').value} Gy`,
+        `Fractions: ${document.getElementById('fractions').value}`,
+        `Alpha/Beta: ${document.getElementById('alphaBeta').value} Gy`,
+        `Dose per fraction: ${document.getElementById('dosePerFraction').textContent}`,
+        `BED: ${document.getElementById('bed').textContent}`,
+        `EQD2: ${document.getElementById('eqd2').textContent}`
+      ].join('\n');
+
+      try {
+        await navigator.clipboard.writeText(text);
+        setText('copyStatus', 'Results copied to clipboard.');
+      } catch (error) {
+        setText('copyStatus', 'Copy failed. You can manually select and copy the results.');
+      }
+    }
+
+    document.querySelectorAll('input, select').forEach(element => {
+      element.addEventListener('input', calculateEqd2);
+      element.addEventListener('change', calculateEqd2);
+    });
+
+    calculateEqd2();
+  </script>
+</body>
+</html>
